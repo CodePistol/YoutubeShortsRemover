@@ -24,6 +24,25 @@ const removeShortsFromSidebar = () => {
     return false;
 }
 
+const removeShortsFromExpandedSidebar = () => {
+    console.log("Here????")
+    var sidebar = document.getElementById('guide-inner-content');
+    if(!sidebar){
+        return false;
+    }
+
+    var entryRenderers = document.querySelectorAll('ytd-guide-entry-renderer');
+
+    entryRenderers.forEach((element) => {
+        anchorTag = element.querySelector('a');
+        if(anchorTag && anchorTag.title=='Shorts'){
+            element.parentElement.removeChild(element);
+            return true
+        }
+    }) 
+    return false;
+}
+
 const removeShortsFromBody = () => {   
     var elements = document.querySelectorAll('ytd-rich-section-renderer');
     elements.forEach(function(element) {
@@ -37,8 +56,9 @@ const removeShortsFromBody = () => {
     });
 }
 
-var debouncedRemoveShortsFromBody = debounce(removeShortsFromBody, 300);
-var debouncedRemoveShortsFromSidebar = debounce(removeShortsFromSidebar, 300);
+var debouncedRemoveShortsFromBody = debounce(removeShortsFromBody, 100);
+var debouncedRemoveShortsFromSidebar = debounce(removeShortsFromSidebar, 100);
+var debouncedRemoveShortsFromExpandedSidebar = debounce(removeShortsFromExpandedSidebar, 100);
 
 document.onscroll = () => {
     debouncedRemoveShortsFromBody();
@@ -46,6 +66,8 @@ document.onscroll = () => {
 }
 
 removeShortsFromBody();
+removeShortsFromSidebar();
+removeShortsFromExpandedSidebar();
 
 var retries1 = 10;
 var sidebarInterval = setInterval(() => {
@@ -55,9 +77,18 @@ var sidebarInterval = setInterval(() => {
     }
 }, 300)
 
+var retries2 = 10;
+var expandedSidebarInterval = setInterval(() => {
+    retries2--;
+    if (removeShortsFromSidebar() || retries2 === 0) {
+        clearInterval(expandedSidebarInterval);
+    }
+}, 300)
+
 const callback = () => {
     debouncedRemoveShortsFromBody();
     debouncedRemoveShortsFromSidebar();
+    debouncedRemoveShortsFromExpandedSidebar();
 }
 
 var observer = new MutationObserver(callback,);
